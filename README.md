@@ -1,7 +1,8 @@
 # MMM-PhoneDetect
 Detect if phones are in the network and turn on and off the mirror.
 <p></p>
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/J3J2EARPK)]
+
+
 
 ow to install:
 ```
@@ -23,3 +24,4 @@ In MagicMirror/config/config.js
   },
 },
 ```
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/J3J2EARPK)
