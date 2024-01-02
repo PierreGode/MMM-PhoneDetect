@@ -9,6 +9,7 @@ Module.register("MMM-PhoneDetect", {
 
   // Start method
   start: function () {
+    Log.info("Starting MMM-PhoneDetect module");
     this.sendSocketNotification("CONFIG", this.config);
     this.scheduleCheck();
   },
@@ -27,8 +28,10 @@ Module.register("MMM-PhoneDetect", {
     const phoneDetected = this.config.phones.some((mac) => self.isPhonePresent(mac));
 
     if (phoneDetected) {
+      Log.info("Phone presence detected. Turning on the mirror.");
       this.turnMirrorOn();
     } else {
+      Log.info("No phone presence detected. Turning off the mirror.");
       this.turnMirrorOff();
     }
   },
@@ -42,6 +45,7 @@ Module.register("MMM-PhoneDetect", {
 
   // Turn on the mirror
   turnMirrorOn: function () {
+    Log.info("Turning on the mirror.");
     // Execute the command to turn on the mirror
     this.sendNotification("REMOTE_ACTION", {
       action: "EXEC",
@@ -51,6 +55,7 @@ Module.register("MMM-PhoneDetect", {
 
   // Turn off the mirror
   turnMirrorOff: function () {
+    Log.info("Turning off the mirror.");
     // Execute the command to turn off the mirror
     this.sendNotification("REMOTE_ACTION", {
       action: "EXEC",
