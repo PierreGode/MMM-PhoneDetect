@@ -7,40 +7,30 @@ Module.register("MMM-PhoneDetect", {
     checkInterval: 5000, // Check for phone presence every 5 seconds
   },
 
+  nodeHelper: null, // Reference to the Node helper
+
   // Start method
   start: function () {
     Log.info("Starting MMM-PhoneDetect module");
     this.sendSocketNotification("CONFIG", this.config);
-    this.scheduleCheck();
   },
 
-  // Schedule periodic checks for phone presence
-  scheduleCheck: function () {
-    const self = this;
-    setInterval(() => {
-      self.checkPhonePresence();
-    }, this.config.checkInterval);
+  // Notification handler
+  notificationReceived: function (notification, payload, sender) {
+    // Handle any specific notifications if needed
   },
 
-  // Check if any of the phones are present
-  checkPhonePresence: function () {
-    const self = this;
-    const phoneDetected = this.config.phones.some((mac) => self.isPhonePresent(mac));
-
-    if (phoneDetected) {
-      Log.info("Phone presence detected. Turning on the mirror.");
-      this.turnMirrorOn();
-    } else {
-      Log.info("No phone presence detected. Turning off the mirror.");
-      this.turnMirrorOff();
+  // Socket notification handler
+  socketNotificationReceived: function (notification, payload) {
+    if (notification === "PHONE_PRESENCE") {
+      if (payload === true) {
+        Log.info("Phone presence detected. Turning on the mirror.");
+        this.turnMirrorOn();
+      } else {
+        Log.info("No phone presence detected. Turning off the mirror.");
+        this.turnMirrorOff();
+      }
     }
-  },
-
-  // Function to check if a phone is present on the network
-  isPhonePresent: function (macAddress) {
-    // Implement phone presence detection logic here
-    // You can use methods like ARP ping or network scanning
-    // Return true if the phone is present, false otherwise
   },
 
   // Turn on the mirror
@@ -61,10 +51,5 @@ Module.register("MMM-PhoneDetect", {
       action: "EXEC",
       command: this.config.turnOffCommand,
     });
-  },
-
-  // Notification handler
-  notificationReceived: function (notification, payload, sender) {
-    // Handle any specific notifications if needed
   },
 });
