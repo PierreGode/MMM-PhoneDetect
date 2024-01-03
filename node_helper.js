@@ -25,24 +25,26 @@ module.exports = NodeHelper.create({
 
 
 
- // Function to check if a phone is present on the network using ARP scanning
+// Function to check if a phone is present on the network using ARP scanning
 isPhonePresent: function (macAddress) {
   return new Promise((resolve, reject) => {
     exec(`sudo arp-scan -q -l | grep -i ${macAddress}`, (error, stdout, stderr) => {
+      console.log(`ARP scan command executed for MAC ${macAddress}`);
       if (error) {
-        console.error(`MMM-PhoneDetect Error scanning ARP cache: ${error}`);
+        console.error(`Error scanning ARP cache: ${error.message}`);
+        console.log(`stderr: ${stderr}`);
         resolve(false); // Assume phone is not present in case of error
       } else {
+        // Log the raw output of the arp-scan command
+        console.log(`Raw ARP scan output: ${stdout}`);
+        
         // Check if the MAC address is found in the ARP cache (case-insensitive)
-        console.log("MMM-PhoneDetect scanning ARP cache.");
         const isPresent = stdout.toLowerCase().includes(macAddress.toLowerCase());
         if (isPresent) {
-          console.log(`MMM-PhoneDetect Phone ${macAddress} is present.`);
-          console.log("MMM-PhoneDetect arp phone is there.");
+          console.log(`Phone ${macAddress} is present.`);
           resolve(true);
         } else {
-          console.log(`MMM-PhoneDetect Phone ${macAddress} is not present.`);
-          console.log("MMM-PhoneDetect arp phone is not there.");
+          console.log(`Phone ${macAddress} is not present.`);
           resolve(false);
         }
       }
