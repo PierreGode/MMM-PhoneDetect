@@ -19,9 +19,8 @@ module.exports = NodeHelper.create({
 
   // Schedule periodic checks for phone presence
   scheduleCheck: function () {
-    const self = this;
     setInterval(() => {
-      self.checkPhonePresence();
+      this.checkPhonePresence();
     }, this.config.checkInterval);
   },
 
@@ -56,31 +55,14 @@ module.exports = NodeHelper.create({
 
   // Check if any of the phones are present
   checkPhonePresence: function () {
-    const self = this;
     this.performArpScan()
       .then(arpScanOutput => {
-        const phoneDetectedArp = self.config.phones.some(mac => 
-          arpScanOutput.toLowerCase().includes(mac.toLowerCase())
-        );
+        let phoneStatuses = this.config.phones.map(mac => {
+          const isPresent = arpScanOutput.toLowerCase().includes(mac.toLowerCase());
+          return { mac: mac, isOnline: isPresent };
+        });
 
-        if (phoneDetectedArp) {
-          self.handlePhoneDetected();
-        } else {
-          // Perform nmap scan as secondary check
-          self.performNmapScan().then(nmapScanOutput => {
-            const phoneDetectedNmap = self.config.phones.some(mac => 
-              nmapScanOutput.toLowerCase().includes(mac.toLowerCase())
-            );
-
-            if (phoneDetectedNmap) {
-              self.handlePhoneDetected();
-            } else {
-              self.handlePhoneNotDetected();
-            }
-          }).catch(error => {
-            console.error("MMM-PhoneDetect Error in performing nmap scan: ", error);
-          });
-        }
+        this.sendSocketNotification("PHONE_PRESENCE", phoneStatuses);
       })
       .catch(error => {
         console.error("MMM-PhoneDetect Error in performing ARP scan: ", error);
@@ -90,7 +72,7 @@ module.exports = NodeHelper.create({
   handlePhoneDetected: function () {
     this.lastDetectedTime = Date.now(); // Update the last detected time
     console.log("MMM-PhoneDetect detect phone is there.");
-    this.turnMirrorOn();
+    // You may include additional logic here if needed
   },
 
   handlePhoneNotDetected: function () {
