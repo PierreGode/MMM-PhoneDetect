@@ -16,7 +16,7 @@ In MagicMirror/config/config.js
 ```
 {
   module: "MMM-PhoneDetect",
-  position: "top_left", // Change the position as needed
+  position: "bottom_right", // Change the position as needed
   config: {
     phones: ["XX:XX:XX:XX:XX:XX", "YY:YY:YY:YY:YY:YY"], // List of phone MAC addresses to detect
     turnOnCommand: "vcgencmd display_power 1 2", // Command to turn on the mirror
