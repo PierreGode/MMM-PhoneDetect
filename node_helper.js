@@ -30,11 +30,11 @@ checkPhonePresence: function () {
 
   if (phoneDetected) {
     self.sendSocketNotification("PHONE_PRESENCE", true);
-    console.log("MMM-PhoneDetect phone is there.");
+    console.log("MMM-PhoneDetect detect phone is there.");
     self.turnMirrorOn();
   } else {
     self.sendSocketNotification("PHONE_PRESENCE", false);
-    console.log("MMM-PhoneDetect phone is not there.");
+    console.log("MMM-PhoneDetect detect phone is not there.");
     self.turnMirrorOff(); // Turn off the mirror when no phones are detected
   }
 },
@@ -51,11 +51,11 @@ isPhonePresent: function (macAddress) {
         const isPresent = stdout.toLowerCase().includes(macAddress.toLowerCase());
         if (isPresent) {
           console.log(`MMM-PhoneDetect Phone ${macAddress} is present.`);
-          console.log("MMM-PhoneDetect phone is there.");
+          console.log("MMM-PhoneDetect arp phone is there.");
           resolve(true);
         } else {
           console.log(`MMM-PhoneDetect Phone ${macAddress} is not present.`);
-          console.log("MMM-PhoneDetect phone is not there.");
+          console.log("MMM-PhoneDetect arp phone is not there.");
           resolve(false);
         }
       }
