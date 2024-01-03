@@ -1,5 +1,4 @@
 Module.register('MMM-PhoneDetect', {
-  // Default module configuration
   defaults: {
     phones: [], // List of phone MAC addresses to detect
     checkInterval: 5000, // Check for phone presence every 5 seconds
@@ -11,36 +10,37 @@ Module.register('MMM-PhoneDetect', {
     this.onlineDevices = new Set(); // Initialize a set to track online devices
   },
 
-  // Override dom generator
   getDom: function() {
     var wrapper = document.createElement("div");
-    wrapper.className = "phone-dots-container"; // Added class for potential styling
+    wrapper.className = "phone-dots-container";
 
     this.config.phones.forEach(phone => {
       var dot = document.createElement("span");
       dot.className = "phone-dot " + (this.onlineDevices.has(phone) ? "online" : "offline");
+      dot.id = "dot-" + phone; // Assign an ID for easier DOM manipulation
       wrapper.appendChild(dot);
     });
 
     return wrapper;
   },
 
-  // Handling socket notifications
   socketNotificationReceived: function(notification, payload) {
     if (notification === "PHONE_PRESENCE") {
-      // Update onlineDevices based on payload
-      this.onlineDevices.clear(); // Clear and update the set based on the latest payload
       payload.forEach(phone => {
-        if (phone.isOnline) {
-          this.onlineDevices.add(phone.mac);
+        let dot = document.getElementById("dot-" + phone.mac);
+        if (dot) {
+          if (phone.isOnline) {
+            this.onlineDevices.add(phone.mac);
+            dot.className = "phone-dot online";
+          } else {
+            this.onlineDevices.delete(phone.mac);
+            dot.className = "phone-dot offline";
+          }
         }
       });
-
-      this.updateDom(); // Update the DOM whenever the online status changes
     }
   },
 
-  // Load external CSS file
   getStyles: function() {
     return ["MMM-PhoneDetect.css"];
   },
