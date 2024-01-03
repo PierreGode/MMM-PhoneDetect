@@ -1,11 +1,5 @@
 Module.register('MMM-PhoneDetect', {
-  // Default module config
-  defaults: {
-    phones: '', // List of phone MAC addresses to detect, to be defined in config.js
-    turnOnCommand: "vcgencmd display_power 1 2", // Command to turn on the mirror
-    turnOffCommand: "vcgencmd display_power 0 2", // Command to turn off the mirror
-    checkInterval: 5000, // Check for phone presence every 5 seconds
-  },
+  // Default module config is not needed for phones as it's provided in config.js
 
   // Start method
   start: function () {
