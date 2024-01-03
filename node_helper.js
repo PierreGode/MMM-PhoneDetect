@@ -42,7 +42,7 @@ checkPhonePresence: function () {
   // Function to check if a phone is present on the network using ARP scanning
   isPhonePresent: function (macAddress) {
     return new Promise((resolve, reject) => {
-exec(`sudo arp-scan -q -l | grep ${macAddress}`, (error, stdout, stderr) => {
+exec(`sudo arp-scan -l | grep -i ${macAddress}`, (error, stdout, stderr) => {
   if (error) {
     console.error(`MMM-PhoneDetect Error scanning ARP cache: ${error}`);
     resolve(false); // Assume phone is not present in case of error
