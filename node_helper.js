@@ -31,7 +31,7 @@ isPhonePresent: function (macAddress) {
     exec(`sudo arp-scan -q -l | grep -i ${macAddress}`, (error, stdout, stderr) => {
       console.log(`MMM-PhoneDetect ARP scan command executed for MAC ${macAddress}`);
       if (error) {
-        console.error(` MMM-PhoneDetectError scanning ARP cache: ${error.message}`);
+        console.error(`MMM-PhoneDetect Error scanning ARP cache: ${error.message}`);
         console.log(`MMM-PhoneDetect stderr: ${stderr}`);
         resolve(false); // Assume phone is not present in case of error
       } else {
