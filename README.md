@@ -1,5 +1,6 @@
 # MMM-PhoneDetect
 ![image](https://github.com/PierreGode/MMM-PhoneDetect/assets/8579922/b68340ae-3dad-49ec-abe0-71635c4c403c)
+<p>
 For raspberry pi
 Detect if phones are in the network and turn on and off the mirror depending on the status.
 
