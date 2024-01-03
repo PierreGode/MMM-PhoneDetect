@@ -24,19 +24,20 @@ module.exports = NodeHelper.create({
   },
 
   // Check if any of the phones are present
-  checkPhonePresence: function () {
-    const self = this;
-    const phoneDetected = this.config.phones.some((mac) => self.isPhonePresent(mac));
+checkPhonePresence: function () {
+  const self = this;
+  const phoneDetected = this.config.phones.some((mac) => self.isPhonePresent(mac));
 
-    if (phoneDetected) {
-      self.sendSocketNotification("PHONE_PRESENCE", true);
-      console.log("MMM-PhoneDetect phone is there.");
-      self.turnMirrorOn();
-    } else {
-      self.sendSocketNotification("PHONE_PRESENCE", false);
-      self.turnMirrorOff();
-    }
-  },
+  if (phoneDetected) {
+    self.sendSocketNotification("PHONE_PRESENCE", true);
+    console.log("MMM-PhoneDetect phone is there.");
+    self.turnMirrorOn();
+  } else {
+    self.sendSocketNotification("PHONE_PRESENCE", false);
+    console.log("MMM-PhoneDetect phone is not there.");
+    self.turnMirrorOff(); // Turn off the mirror when no phones are detected
+  }
+},
 
   // Function to check if a phone is present on the network using ARP scanning
   isPhonePresent: function (macAddress) {
