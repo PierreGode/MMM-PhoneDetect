@@ -53,40 +53,40 @@ module.exports = NodeHelper.create({
     });
   },
 
-  // Check if any of the phones are present
-  checkPhonePresence: function () {
-    const self = this;
-    this.performArpScan()
-      .then(arpScanOutput => {
-        const phoneDetectedArp = self.config.phones.some(mac => 
-          arpScanOutput.toLowerCase().includes(mac.toLowerCase())
-          console.log("MMM-PhoneDetect ARP Scan Output:\n", arpScanOutput);
-          console.log("MMM-PhoneDetect nmap Scan Output:\n", nmapScanOutput);
-        );
+// Check if any of the phones are present
+checkPhonePresence: function () {
+  const self = this;
+  this.performArpScan()
+    .then(arpScanOutput => {
+      console.log("MMM-PhoneDetect ARP Scan Output:\n", arpScanOutput); // Corrected placement
+      const phoneDetectedArp = self.config.phones.some(mac => 
+        arpScanOutput.toLowerCase().includes(mac.toLowerCase())
+      );
 
-        if (phoneDetectedArp) {
-          self.handlePhoneDetected();
-        } else {
-          // Perform nmap scan as secondary check
-          self.performNmapScan().then(nmapScanOutput => {
-            const phoneDetectedNmap = self.config.phones.some(mac => 
-              nmapScanOutput.toLowerCase().includes(mac.toLowerCase())
-            );
+      if (phoneDetectedArp) {
+        self.handlePhoneDetected();
+      } else {
+        // Perform nmap scan as secondary check
+        self.performNmapScan().then(nmapScanOutput => {
+          console.log("MMM-PhoneDetect nmap Scan Output:\n", nmapScanOutput); // Corrected placement
+          const phoneDetectedNmap = self.config.phones.some(mac => 
+            nmapScanOutput.toLowerCase().includes(mac.toLowerCase())
+          );
 
-            if (phoneDetectedNmap) {
-              self.handlePhoneDetected();
-            } else {
-              self.handlePhoneNotDetected();
-            }
-          }).catch(error => {
-            console.error("MMM-PhoneDetect Error in performing nmap scan: ", error);
-          });
-        }
-      })
-      .catch(error => {
-        console.error("MMM-PhoneDetect Error in performing ARP scan: ", error);
-      });
-  },
+          if (phoneDetectedNmap) {
+            self.handlePhoneDetected();
+          } else {
+            self.handlePhoneNotDetected();
+          }
+        }).catch(error => {
+          console.error("MMM-PhoneDetect Error in performing nmap scan: ", error);
+        });
+      }
+    })
+    .catch(error => {
+      console.error("MMM-PhoneDetect Error in performing ARP scan: ", error);
+    });
+},
 
   handlePhoneDetected: function () {
     this.absenceCount = 0; // Reset counter
