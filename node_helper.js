@@ -59,24 +59,32 @@ module.exports = NodeHelper.create({
     const self = this;
     this.performArpScan()
       .then(arpScanOutput => {
-        const phoneDetectedArp = self.config.phones.some(mac => 
-          arpScanOutput.toLowerCase().includes(mac.toLowerCase())
-        );
+        let phonePresenceData = [];
+
+        const phoneDetectedArp = self.config.phones.some(mac => {
+          const isPresent = arpScanOutput.toLowerCase().includes(mac.toLowerCase());
+          phonePresenceData.push({ mac, isOnline: isPresent });
+          return isPresent;
+        });
 
         if (phoneDetectedArp) {
           self.handlePhoneDetected();
+          self.sendSocketNotification("PHONE_PRESENCE", phonePresenceData);
         } else {
           // Perform nmap scan as secondary check
           self.performNmapScan().then(nmapScanOutput => {
-            const phoneDetectedNmap = self.config.phones.some(mac => 
-              nmapScanOutput.toLowerCase().includes(mac.toLowerCase())
-            );
+            phonePresenceData = self.config.phones.map(mac => {
+              const isPresent = nmapScanOutput.toLowerCase().includes(mac.toLowerCase());
+              return { mac, isOnline: isPresent };
+            });
+            const phoneDetectedNmap = phonePresenceData.some(phone => phone.isOnline);
 
             if (phoneDetectedNmap) {
               self.handlePhoneDetected();
             } else {
               self.handlePhoneNotDetected();
             }
+            self.sendSocketNotification("PHONE_PRESENCE", phonePresenceData);
           }).catch(error => {
             console.error("MMM-PhoneDetect Error in performing nmap scan: ", error);
           });
@@ -89,15 +97,12 @@ module.exports = NodeHelper.create({
 
   handlePhoneDetected: function () {
     this.lastDetectedTime = Date.now(); // Update the last detected time
-    this.sendSocketNotification("PHONE_PRESENCE", true);
     console.log("MMM-PhoneDetect detect phone is there.");
-    this.turnMirrorOn();
   },
 
   handlePhoneNotDetected: function () {
     const timeSinceLastDetected = Date.now() - this.lastDetectedTime;
     if (timeSinceLastDetected >= this.config.nonResponsiveDuration) {
-      this.sendSocketNotification("PHONE_PRESENCE", false);
       console.log("MMM-PhoneDetect detect phone is not there.");
       this.turnMirrorOff();
     }
@@ -123,5 +128,3 @@ module.exports = NodeHelper.create({
         console.log("MMM-PhoneDetect Mirror turned off.");
       }
     });
-  },
-});
