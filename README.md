@@ -3,6 +3,7 @@
 <p>
 For raspberry pi
 Detect if phones are in the network and turn on and off the mirror depending on the status.
+Configured devices are represented as dots and will show them as green when the device is responding to ARP or nmap.
 
 How to install:
 ```
