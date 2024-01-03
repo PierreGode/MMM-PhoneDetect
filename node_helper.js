@@ -25,18 +25,20 @@ module.exports = NodeHelper.create({
   },
 
   // Function to perform ARP scan
-  performArpScan: function () {
-    return new Promise((resolve, reject) => {
-      exec('sudo arp-scan -q -l', (error, stdout, stderr) => {
-        if (error) {
-          console.error(`MMM-PhoneDetect Error performing ARP scan: ${error.message}`);
-          reject(error);
-        } else {
-          resolve(stdout);
-        }
-      });
+performArpScan: function () {
+  return new Promise((resolve, reject) => {
+    console.log("Executing ARP scan..."); // Added for debugging
+    exec('sudo arp-scan -q -l', (error, stdout, stderr) => {
+      if (error) {
+        console.error(`MMM-PhoneDetect Error performing ARP scan: ${error.message}`);
+        reject(error);
+      } else {
+        console.log("MMM-PhoneDetect ARP scan completed."); // Added for debugging
+        resolve(stdout);
+      }
     });
-  },
+  });
+},
 
   // Function to perform nmap scan
   performNmapScan: function () {
