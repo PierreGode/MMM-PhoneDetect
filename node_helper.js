@@ -29,6 +29,7 @@ module.exports = NodeHelper.create({
 
     if (phoneDetected) {
       self.sendSocketNotification("PHONE_PRESENCE", true);
+      console.log("MMM-PhoneDetect phone is there.");
       self.turnMirrorOn();
     } else {
       self.sendSocketNotification("PHONE_PRESENCE", false);
@@ -41,11 +42,11 @@ module.exports = NodeHelper.create({
     return new Promise((resolve, reject) => {
       exec(`sudo arp-scan -q -l | grep ${macAddress}`, (error, stdout, stderr) => {
         if (error) {
-          console.error(`Error scanning ARP cache: ${error}`);
+          console.error(`MMM-PhoneDetect Error scanning ARP cache: ${error}`);
           resolve(false); // Assume phone is not present in case of error
         } else {
           // Check if the MAC address is found in the ARP cache
-          console.log("scanning ARP cache.");
+          console.log("MMM-PhoneDetect scanning ARP cache.");
           const isPresent = stdout.includes(macAddress);
           resolve(isPresent);
         }
@@ -57,9 +58,9 @@ module.exports = NodeHelper.create({
   turnMirrorOn: function () {
     exec(this.config.turnOnCommand, (error, stdout, stderr) => {
       if (error) {
-        console.error(`Error turning on the mirror: ${error}`);
+        console.error(`MMM-PhoneDetect Error turning on the mirror: ${error}`);
       } else {
-        console.log("Mirror turned on.");
+        console.log("MMM-PhoneDetect Mirror turned on.");
       }
     });
   },
@@ -68,9 +69,9 @@ module.exports = NodeHelper.create({
   turnMirrorOff: function () {
     exec(this.config.turnOffCommand, (error, stdout, stderr) => {
       if (error) {
-        console.error(`Error turning off the mirror: ${error}`);
+        console.error(`MMM-PhoneDetect Error turning off the mirror: ${error}`);
       } else {
-        console.log("Mirror turned off.");
+        console.log("MMM-PhoneDetect Mirror turned off.");
       }
     });
   },
