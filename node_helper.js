@@ -43,10 +43,12 @@ module.exports = NodeHelper.create({
     return new Promise((resolve, reject) => {
       const networkRange = '192.168.1.0/24'; // Replace with your network range
       exec(`sudo nmap -sn ${networkRange}`, (error, stdout, stderr) => {
+        console.log(`"MMM-PhoneDetect ARP scan command executed for MAC ${macAddress}`);
         if (error) {
           console.error(`MMM-PhoneDetect Error performing nmap scan: ${error.message}`);
           reject(error);
         } else {
+          console.log(`"MMM-PhoneDetect Raw ARP scan output: ${stdout}`);
           resolve(stdout);
         }
       });
@@ -60,6 +62,7 @@ module.exports = NodeHelper.create({
         let phoneStatuses = this.config.phones.map(mac => {
           const isPresent = arpScanOutput.toLowerCase().includes(mac.toLowerCase());
           return { mac: mac, isOnline: isPresent };
+          console.log(`"MMM-PhoneDetect Phone ${macAddress} is present.`);
         });
 
         this.sendSocketNotification("PHONE_PRESENCE", phoneStatuses);
