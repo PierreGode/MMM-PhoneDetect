@@ -5,7 +5,7 @@ For raspberry pi
 Detect if phones are in the network and turn on and off the mirror depending on the status.
 
 Default is turn off mirror after 1 hour if no device is detected, can be adjusted in config.js
-phones got to sleep mode when not used and stops responding to ARP so recommended is to have 1 hour of inactivity before turning off the mirror.
+phones go to sleep mode when not used and stop responding to ARP so recommended is to have 1 hour of inactivity before turning off the mirror.
 also best if you add multiple devices ( people ) for better stability.
 
 the module is designed for raspberry pi and requires apt programs
