@@ -52,20 +52,26 @@ isPhonePresent: function (macAddress) {
   });
 },
   
-  // Check if any of the phones are present
+// Check if any of the phones are present
 checkPhonePresence: function () {
   const self = this;
-  const phoneDetected = this.config.phones.some((mac) => self.isPhonePresent(mac));
-
-  if (phoneDetected) {
-    self.sendSocketNotification("PHONE_PRESENCE", true);
-    console.log("MMM-PhoneDetect detect phone is there.");
-    self.turnMirrorOn();
-  } else {
-    self.sendSocketNotification("PHONE_PRESENCE", false);
-    console.log("MMM-PhoneDetect detect phone is not there.");
-    self.turnMirrorOff(); // Turn off the mirror when no phones are detected
-  }
+  // Use Promise.all to wait for all promises to resolve
+  Promise.all(this.config.phones.map(mac => self.isPhonePresent(mac)))
+    .then(results => {
+      const phoneDetected = results.some(isPresent => isPresent);
+      if (phoneDetected) {
+        self.sendSocketNotification("PHONE_PRESENCE", true);
+        console.log("MMM-PhoneDetect detect phone is there.");
+        self.turnMirrorOn();
+      } else {
+        self.sendSocketNotification("PHONE_PRESENCE", false);
+        console.log("MMM-PhoneDetect detect phone is not there.");
+        self.turnMirrorOff(); // Turn off the mirror when no phones are detected
+      }
+    })
+    .catch(error => {
+      console.error("Error in checking phone presence: ", error);
+    });
 },
 
   // Turn on the mirror
