@@ -24,39 +24,29 @@ module.exports = NodeHelper.create({
     }, this.config.checkInterval);
   },
 
-  // Function to check if a phone is present on the network using ARP scanning
-  isPhonePresent: function (macAddress) {
+  // Function to perform ARP scan
+  performArpScan: function () {
     return new Promise((resolve, reject) => {
-      exec(`sudo arp-scan -q -l | grep -i ${macAddress}`, (error, stdout, stderr) => {
-        console.log(`MMM-PhoneDetect ARP scan command executed for MAC ${macAddress}`);
+      exec('sudo arp-scan -q -l', (error, stdout, stderr) => {
         if (error) {
-          console.error(`MMM-PhoneDetect Error scanning ARP cache: ${error.message}`);
-          console.log(`MMM-PhoneDetect stderr: ${stderr}`);
-          resolve(false); // Assume phone is not present in case of error
+          console.error(`MMM-PhoneDetect Error performing ARP scan: ${error.message}`);
+          reject(error);
         } else {
-          // Log the raw output of the arp-scan command
-          console.log(`MMM-PhoneDetect Raw ARP scan output: ${stdout}`);
-          
-          // Check if the MAC address is found in the ARP cache (case-insensitive)
-          const isPresent = stdout.toLowerCase().includes(macAddress.toLowerCase());
-          if (isPresent) {
-            console.log(`MMM-PhoneDetect Phone ${macAddress} is present.`);
-            resolve(true);
-          } else {
-            console.log(`MMM-PhoneDetect Phone ${macAddress} is not present.`);
-            resolve(false);
-          }
+          resolve(stdout);
         }
       });
     });
   },
-  
+
   // Check if any of the phones are present
   checkPhonePresence: function () {
     const self = this;
-    Promise.all(this.config.phones.map(mac => self.isPhonePresent(mac)))
-      .then(results => {
-        const phoneDetected = results.some(isPresent => isPresent);
+    this.performArpScan()
+      .then(arpScanOutput => {
+        const phoneDetected = self.config.phones.some(mac => 
+          arpScanOutput.toLowerCase().includes(mac.toLowerCase())
+        );
+
         if (phoneDetected) {
           self.absenceCount = 0; // Reset counter
           self.sendSocketNotification("PHONE_PRESENCE", true);
@@ -68,12 +58,11 @@ module.exports = NodeHelper.create({
             self.sendSocketNotification("PHONE_PRESENCE", false);
             console.log("MMM-PhoneDetect detect phone is not there.");
             self.turnMirrorOff();
-            self.absenceCount = 0; // Reset counter after turning off
           }
         }
       })
       .catch(error => {
-        console.error("Error in checking phone presence: ", error);
+        console.error("Error in performing ARP scan: ", error);
       });
   },
 
