@@ -59,32 +59,24 @@ module.exports = NodeHelper.create({
     const self = this;
     this.performArpScan()
       .then(arpScanOutput => {
-        let phonePresenceData = [];
-
-        const phoneDetectedArp = self.config.phones.some(mac => {
-          const isPresent = arpScanOutput.toLowerCase().includes(mac.toLowerCase());
-          phonePresenceData.push({ mac, isOnline: isPresent });
-          return isPresent;
-        });
+        const phoneDetectedArp = self.config.phones.some(mac => 
+          arpScanOutput.toLowerCase().includes(mac.toLowerCase())
+        );
 
         if (phoneDetectedArp) {
           self.handlePhoneDetected();
-          self.sendSocketNotification("PHONE_PRESENCE", phonePresenceData);
         } else {
           // Perform nmap scan as secondary check
           self.performNmapScan().then(nmapScanOutput => {
-            phonePresenceData = self.config.phones.map(mac => {
-              const isPresent = nmapScanOutput.toLowerCase().includes(mac.toLowerCase());
-              return { mac, isOnline: isPresent };
-            });
-            const phoneDetectedNmap = phonePresenceData.some(phone => phone.isOnline);
+            const phoneDetectedNmap = self.config.phones.some(mac => 
+              nmapScanOutput.toLowerCase().includes(mac.toLowerCase())
+            );
 
             if (phoneDetectedNmap) {
               self.handlePhoneDetected();
             } else {
               self.handlePhoneNotDetected();
             }
-            self.sendSocketNotification("PHONE_PRESENCE", phonePresenceData);
           }).catch(error => {
             console.error("MMM-PhoneDetect Error in performing nmap scan: ", error);
           });
@@ -98,6 +90,7 @@ module.exports = NodeHelper.create({
   handlePhoneDetected: function () {
     this.lastDetectedTime = Date.now(); // Update the last detected time
     console.log("MMM-PhoneDetect detect phone is there.");
+    this.turnMirrorOn();
   },
 
   handlePhoneNotDetected: function () {
@@ -128,3 +121,5 @@ module.exports = NodeHelper.create({
         console.log("MMM-PhoneDetect Mirror turned off.");
       }
     });
+  },
+});
