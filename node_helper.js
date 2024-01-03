@@ -4,6 +4,7 @@ const { exec } = require("child_process");
 module.exports = NodeHelper.create({
   start: function () {
     console.log("MMM-PhoneDetect helper started...");
+    this.absenceCount = 0; // Counter for consecutive absences
   },
 
   // Handle the CONFIG notification from the module
@@ -23,56 +24,58 @@ module.exports = NodeHelper.create({
     }, this.config.checkInterval);
   },
 
-
-
-// Function to check if a phone is present on the network using ARP scanning
-isPhonePresent: function (macAddress) {
-  return new Promise((resolve, reject) => {
-    exec(`sudo arp-scan -q -l | grep -i ${macAddress}`, (error, stdout, stderr) => {
-      console.log(`MMM-PhoneDetect ARP scan command executed for MAC ${macAddress}`);
-      if (error) {
-        console.error(`MMM-PhoneDetect Error scanning ARP cache: ${error.message}`);
-        console.log(`MMM-PhoneDetect stderr: ${stderr}`);
-        resolve(false); // Assume phone is not present in case of error
-      } else {
-        // Log the raw output of the arp-scan command
-        console.log(`MMM-PhoneDetect Raw ARP scan output: ${stdout}`);
-        
-        // Check if the MAC address is found in the ARP cache (case-insensitive)
-        const isPresent = stdout.toLowerCase().includes(macAddress.toLowerCase());
-        if (isPresent) {
-          console.log(`MMM-PhoneDetect Phone ${macAddress} is present.`);
-          resolve(true);
+  // Function to check if a phone is present on the network using ARP scanning
+  isPhonePresent: function (macAddress) {
+    return new Promise((resolve, reject) => {
+      exec(`sudo arp-scan -q -l | grep -i ${macAddress}`, (error, stdout, stderr) => {
+        console.log(`MMM-PhoneDetect ARP scan command executed for MAC ${macAddress}`);
+        if (error) {
+          console.error(`MMM-PhoneDetect Error scanning ARP cache: ${error.message}`);
+          console.log(`MMM-PhoneDetect stderr: ${stderr}`);
+          resolve(false); // Assume phone is not present in case of error
         } else {
-          console.log(`MMM-PhoneDetect Phone ${macAddress} is not present.`);
-          resolve(false);
+          // Log the raw output of the arp-scan command
+          console.log(`MMM-PhoneDetect Raw ARP scan output: ${stdout}`);
+          
+          // Check if the MAC address is found in the ARP cache (case-insensitive)
+          const isPresent = stdout.toLowerCase().includes(macAddress.toLowerCase());
+          if (isPresent) {
+            console.log(`MMM-PhoneDetect Phone ${macAddress} is present.`);
+            resolve(true);
+          } else {
+            console.log(`MMM-PhoneDetect Phone ${macAddress} is not present.`);
+            resolve(false);
+          }
         }
-      }
+      });
     });
-  });
-},
+  },
   
-// Check if any of the phones are present
-checkPhonePresence: function () {
-  const self = this;
-  // Use Promise.all to wait for all promises to resolve
-  Promise.all(this.config.phones.map(mac => self.isPhonePresent(mac)))
-    .then(results => {
-      const phoneDetected = results.some(isPresent => isPresent);
-      if (phoneDetected) {
-        self.sendSocketNotification("PHONE_PRESENCE", true);
-        console.log("MMM-PhoneDetect detect phone is there.");
-        self.turnMirrorOn();
-      } else {
-        self.sendSocketNotification("PHONE_PRESENCE", false);
-        console.log("MMM-PhoneDetect detect phone is not there.");
-        self.turnMirrorOff(); // Turn off the mirror when no phones are detected
-      }
-    })
-    .catch(error => {
-      console.error("Error in checking phone presence: ", error);
-    });
-},
+  // Check if any of the phones are present
+  checkPhonePresence: function () {
+    const self = this;
+    Promise.all(this.config.phones.map(mac => self.isPhonePresent(mac)))
+      .then(results => {
+        const phoneDetected = results.some(isPresent => isPresent);
+        if (phoneDetected) {
+          self.absenceCount = 0; // Reset counter
+          self.sendSocketNotification("PHONE_PRESENCE", true);
+          console.log("MMM-PhoneDetect detect phone is there.");
+          self.turnMirrorOn();
+        } else {
+          self.absenceCount++; // Increment counter
+          if (self.absenceCount >= 5) {
+            self.sendSocketNotification("PHONE_PRESENCE", false);
+            console.log("MMM-PhoneDetect detect phone is not there.");
+            self.turnMirrorOff();
+            self.absenceCount = 0; // Reset counter after turning off
+          }
+        }
+      })
+      .catch(error => {
+        console.error("Error in checking phone presence: ", error);
+      });
+  },
 
   // Turn on the mirror
   turnMirrorOn: function () {
