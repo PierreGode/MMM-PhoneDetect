@@ -60,8 +60,8 @@ module.exports = NodeHelper.create({
       .then(arpScanOutput => {
         const phoneDetectedArp = self.config.phones.some(mac => 
           arpScanOutput.toLowerCase().includes(mac.toLowerCase())
-          console.log("ARP Scan Output:\n", arpScanOutput);
-          console.log("nmap Scan Output:\n", nmapScanOutput);
+          console.log("MMM-PhoneDetect ARP Scan Output:\n", arpScanOutput);
+          console.log("MMM-PhoneDetect nmap Scan Output:\n", nmapScanOutput);
         );
 
         if (phoneDetectedArp) {
@@ -79,12 +79,12 @@ module.exports = NodeHelper.create({
               self.handlePhoneNotDetected();
             }
           }).catch(error => {
-            console.error("Error in performing nmap scan: ", error);
+            console.error("MMM-PhoneDetect Error in performing nmap scan: ", error);
           });
         }
       })
       .catch(error => {
-        console.error("Error in performing ARP scan: ", error);
+        console.error("MMM-PhoneDetect Error in performing ARP scan: ", error);
       });
   },
 
