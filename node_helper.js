@@ -38,32 +38,68 @@ module.exports = NodeHelper.create({
     });
   },
 
+  // Function to perform nmap scan
+  performNmapScan: function () {
+    return new Promise((resolve, reject) => {
+      const networkRange = '192.168.1.0/24'; // Replace with your network range
+      exec(`sudo nmap -sn ${networkRange}`, (error, stdout, stderr) => {
+        if (error) {
+          console.error(`MMM-PhoneDetect Error performing nmap scan: ${error.message}`);
+          reject(error);
+        } else {
+          resolve(stdout);
+        }
+      });
+    });
+  },
+
   // Check if any of the phones are present
   checkPhonePresence: function () {
     const self = this;
     this.performArpScan()
       .then(arpScanOutput => {
-        const phoneDetected = self.config.phones.some(mac => 
+        const phoneDetectedArp = self.config.phones.some(mac => 
           arpScanOutput.toLowerCase().includes(mac.toLowerCase())
         );
 
-        if (phoneDetected) {
-          self.absenceCount = 0; // Reset counter
-          self.sendSocketNotification("PHONE_PRESENCE", true);
-          console.log("MMM-PhoneDetect detect phone is there.");
-          self.turnMirrorOn();
+        if (phoneDetectedArp) {
+          self.handlePhoneDetected();
         } else {
-          self.absenceCount++; // Increment counter
-          if (self.absenceCount >= 5) {
-            self.sendSocketNotification("PHONE_PRESENCE", false);
-            console.log("MMM-PhoneDetect detect phone is not there.");
-            self.turnMirrorOff();
-          }
+          // Perform nmap scan as secondary check
+          self.performNmapScan().then(nmapScanOutput => {
+            const phoneDetectedNmap = self.config.phones.some(mac => 
+              nmapScanOutput.toLowerCase().includes(mac.toLowerCase())
+            );
+
+            if (phoneDetectedNmap) {
+              self.handlePhoneDetected();
+            } else {
+              self.handlePhoneNotDetected();
+            }
+          }).catch(error => {
+            console.error("Error in performing nmap scan: ", error);
+          });
         }
       })
       .catch(error => {
         console.error("Error in performing ARP scan: ", error);
       });
+  },
+
+  handlePhoneDetected: function () {
+    this.absenceCount = 0; // Reset counter
+    this.sendSocketNotification("PHONE_PRESENCE", true);
+    console.log("MMM-PhoneDetect detect phone is there.");
+    this.turnMirrorOn();
+  },
+
+  handlePhoneNotDetected: function () {
+    this.absenceCount++; // Increment counter
+    if (this.absenceCount >= 5) {
+      this.sendSocketNotification("PHONE_PRESENCE", false);
+      console.log("MMM-PhoneDetect detect phone is not there.");
+      this.turnMirrorOff();
+    }
   },
 
   // Turn on the mirror
