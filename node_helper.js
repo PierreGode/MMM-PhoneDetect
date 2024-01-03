@@ -33,7 +33,7 @@ performArpScan: function () {
         console.error(`MMM-PhoneDetect Error performing ARP scan: ${error.message}`);
         reject(error);
       } else {
-        console.log("MMM-PhoneDetect ARP scan completed."); // Added for debugging
+        console.log(`"MMM-PhoneDetect ARP scan command executed for MAC ${macAddress}`); // Added for debugging
         resolve(stdout);
       }
     });
