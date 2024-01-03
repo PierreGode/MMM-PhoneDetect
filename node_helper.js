@@ -45,6 +45,7 @@ module.exports = NodeHelper.create({
           resolve(false); // Assume phone is not present in case of error
         } else {
           // Check if the MAC address is found in the ARP cache
+          console.log("scanning ARP cache.");
           const isPresent = stdout.includes(macAddress);
           resolve(isPresent);
         }
