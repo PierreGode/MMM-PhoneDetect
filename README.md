@@ -24,12 +24,12 @@ If they do not work you might need to change the drivers in /boot/config.txt
 ```
 sudo nano /boot/config.txt
 ```
-change dtoverlay=vc4-kms-v3d to and reboot
+change dtoverlay=vc4-kms-v3d to
 
 ```
 dtoverlay=vc4-fkms-v3d
 ```
-
+ and reboot
 
 <p></p>
 ![image](https://github.com/PierreGode/MMM-PhoneDetect/assets/8579922/b68340ae-3dad-49ec-abe0-71635c4c403c)
