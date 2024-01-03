@@ -9,6 +9,7 @@ module.exports = NodeHelper.create({
   // Handle the CONFIG notification from the module
   socketNotificationReceived: function (notification, payload) {
     if (notification === "CONFIG") {
+      console.log("MMM-PhoneDetect config found");
       this.config = payload;
       this.scheduleCheck();
     }
