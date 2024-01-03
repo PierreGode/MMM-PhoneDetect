@@ -60,6 +60,8 @@ module.exports = NodeHelper.create({
       .then(arpScanOutput => {
         const phoneDetectedArp = self.config.phones.some(mac => 
           arpScanOutput.toLowerCase().includes(mac.toLowerCase())
+          console.log("ARP Scan Output:\n", arpScanOutput);
+          console.log("nmap Scan Output:\n", nmapScanOutput);
         );
 
         if (phoneDetectedArp) {
