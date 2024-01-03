@@ -51,9 +51,11 @@ isPhonePresent: function (macAddress) {
         const isPresent = stdout.toLowerCase().includes(macAddress.toLowerCase());
         if (isPresent) {
           console.log(`MMM-PhoneDetect Phone ${macAddress} is present.`);
+          console.log("MMM-PhoneDetect phone is there.");
           resolve(true);
         } else {
           console.log(`MMM-PhoneDetect Phone ${macAddress} is not present.`);
+          console.log("MMM-PhoneDetect phone is not there.");
           resolve(false);
         }
       }
