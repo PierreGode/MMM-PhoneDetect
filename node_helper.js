@@ -19,7 +19,7 @@ module.exports = NodeHelper.create({
   scheduleCheck: function () {
     const self = this;
     setInterval(() => {
-      self.checkPhonePresence();
+      self.isPhonePresent();
     }, this.config.checkInterval);
   },
 
