@@ -1,5 +1,9 @@
 Module.register('MMM-PhoneDetect', {
-  // Default module config is not needed for phones as it's provided in config.js
+  // Default module config
+  defaults: {
+    phones: [], // List of phone MAC addresses to detect, to be defined in config.js
+    checkInterval: 5000, // Check for phone presence every 5 seconds
+  },
 
   // Start method
   start: function () {
