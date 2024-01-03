@@ -40,7 +40,6 @@ checkPhonePresence: function () {
 },
 
 // Function to check if a phone is present on the network using ARP scanning
-// Function to check if a phone is present on the network using ARP scanning
 isPhonePresent: function (macAddress) {
   return new Promise((resolve, reject) => {
     exec(`sudo arp-scan -q -l | grep -i ${macAddress}`, (error, stdout, stderr) => {
@@ -49,13 +48,19 @@ isPhonePresent: function (macAddress) {
         resolve(false); // Assume phone is not present in case of error
       } else {
         // Check if the MAC address is found in the ARP cache (case-insensitive)
-        console.log("MMM-PhoneDetect scanning ARP cache.");
         const isPresent = stdout.toLowerCase().includes(macAddress.toLowerCase());
-        resolve(isPresent);
+        if (isPresent) {
+          console.log(`MMM-PhoneDetect Phone ${macAddress} is present.`);
+          resolve(true);
+        } else {
+          console.log(`MMM-PhoneDetect Phone ${macAddress} is not present.`);
+          resolve(false);
+        }
       }
     });
   });
 },
+
 
   // Turn on the mirror
   turnMirrorOn: function () {
