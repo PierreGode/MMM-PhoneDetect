@@ -1,4 +1,3 @@
-
 // PhoneDetect by Pierre Gode
 const NodeHelper = require("node_helper");
 const { exec } = require("child_process");
@@ -99,31 +98,50 @@ module.exports = NodeHelper.create({
   },
 
   checkAndTurnOffMirror: function () {
-    if (Date.now() - this.lastOnlineTime >= this.config.nonResponsiveDuration) {
+    if (Date.now() - this.lastOnlineTime >= this.config.nonResponsiveDuration && !this.isWithinIgnoreHours()) {
       console.log("MMM-PhoneDetect: Turning off the mirror due to no phone presence for the specified duration.");
       this.turnMirrorOff();
     }
   },
 
   turnMirrorOn: function () {
-    console.log("MMM-PhoneDetect: Turning on the mirror...");
-    exec(this.config.turnOnCommand, (error, stdout, stderr) => {
-      if (error) {
-        console.error(`MMM-PhoneDetect: Error turning on the mirror: ${error}`);
-      } else {
-        console.log("MMM-PhoneDetect: Mirror turned on.");
-      }
-    });
+    if (!this.isWithinIgnoreHours()) {
+      console.log("MMM-PhoneDetect: Turning on the mirror...");
+      exec(this.config.turnOnCommand, (error, stdout, stderr) => {
+        if (error) {
+          console.error(`MMM-PhoneDetect: Error turning on the mirror: ${error}`);
+        } else {
+          console.log("MMM-PhoneDetect: Mirror turned on.");
+        }
+      });
+    } else {
+      console.log("MMM-PhoneDetect: Ignoring turn on command due to ignore hours.");
+    }
   },
 
   turnMirrorOff: function () {
-    console.log("MMM-PhoneDetect: Turning off the mirror...");
-    exec(this.config.turnOffCommand, (error, stdout, stderr) => {
-      if (error) {
-        console.error(`MMM-PhoneDetect: Error turning off the mirror: ${error}`);
-      } else {
-        console.log("MMM-PhoneDetect: Mirror turned off.");
-      }
-    });
+    if (!this.isWithinIgnoreHours()) {
+      console.log("MMM-PhoneDetect: Turning off the mirror...");
+      exec(this.config.turnOffCommand, (error, stdout, stderr) => {
+        if (error) {
+          console.error(`MMM-PhoneDetect: Error turning off the mirror: ${error}`);
+        } else {
+          console.log("MMM-PhoneDetect: Mirror turned off.");
+        }
+      });
+    } else {
+      console.log("MMM-PhoneDetect: Ignoring turn off command due to ignore hours.");
+    }
+  },
+
+  isWithinIgnoreHours: function() {
+    const currentHour = new Date().getHours();
+    const { startignoreHour, endignoreHour } = this.config;
+
+    if (startignoreHour < endignoreHour) {
+      return currentHour >= startignoreHour && currentHour < endignoreHour;
+    } else {
+      return currentHour >= startignoreHour || currentHour < endignoreHour;
+    }
   },
 });
