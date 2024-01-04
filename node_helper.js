@@ -4,7 +4,7 @@ const { exec } = require("child_process");
 module.exports = NodeHelper.create({
   start: function () {
     console.log("MMM-PhoneDetect helper started...");
-    this.lastOnlineTime = 0; // Initialize last online time
+    this.lastOnlineTime = Date.now(); // Initialize with current time
   },
 
   socketNotificationReceived: function (notification, payload) {
@@ -80,7 +80,7 @@ module.exports = NodeHelper.create({
           const anyDeviceOnline = combinedPhoneStatuses.some(status => status.isOnline);
           if (!anyDeviceOnline) {
             console.log("MMM-PhoneDetect: No devices online.");
-            this.handleNoDevicesOnline();
+            this.checkAndTurnOffMirror();
           } else {
             console.log("MMM-PhoneDetect: Some devices are online.");
             this.lastOnlineTime = Date.now();
@@ -95,7 +95,7 @@ module.exports = NodeHelper.create({
       });
   },
 
-  handleNoDevicesOnline: function () {
+  checkAndTurnOffMirror: function () {
     if (Date.now() - this.lastOnlineTime >= this.config.nonResponsiveDuration) {
       this.turnMirrorOff();
     }
