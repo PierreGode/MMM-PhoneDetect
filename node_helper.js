@@ -53,32 +53,34 @@ module.exports = NodeHelper.create({
     });
   },
 
-  checkPhonePresence: function () {
-    console.log("MMM-PhoneDetect: Checking phone presence...");
-    this.performArpScan()
-      .then(arpScanOutput => {
-        let arpPhoneStatuses = this.config.phones.map(mac => {
-          return { mac: mac, isOnline: arpScanOutput.toLowerCase().includes(mac.toLowerCase()) };
-        });
-
-        this.performNmapScan().then(nmapScanOutput => {
-          let nmapPhoneStatuses = this.config.phones.map(mac => {
-            return { mac: mac, isOnline: nmapScanOutput.toLowerCase().includes(mac.toLowerCase()) };
-          });
-
-          let combinedPhoneStatuses = arpPhoneStatuses.map(arpStatus => {
-            let nmapStatus = nmapPhoneStatuses.find(nmapStatus => nmapStatus.mac === arpStatus.mac);
-            return { mac: arpStatus.mac, isOnline: arpStatus.isOnline || (nmapStatus ? nmapStatus.isOnline : false) };
-          });
-
-          console.log("MMM-PhoneDetect: Sending phone presence status to module");
-          this.sendSocketNotification("PHONE_PRESENCE", combinedPhoneStatuses);
-        });
-      })
-      .catch(error => {
-        console.error("MMM-PhoneDetect: Error in performing ARP scan: ", error);
+checkPhonePresence: function () {
+  console.log("MMM-PhoneDetect: Checking phone presence...");
+  this.performArpScan()
+    .then(arpScanOutput => {
+      let arpPhoneStatuses = this.config.phones.map(mac => {
+        return { mac: mac, isOnline: arpScanOutput.toLowerCase().includes(mac.toLowerCase()) };
       });
-  },
+
+      this.performNmapScan().then(nmapScanOutput => {
+        let nmapPhoneStatuses = this.config.phones.map(mac => {
+          const isOnline = nmapScanOutput.toLowerCase().includes(mac.toLowerCase());
+          console.log(`MMM-PhoneDetect: Checking phone ${mac}, isOnline: ${isOnline}`);
+          return { mac: mac, isOnline: isOnline };
+        });
+
+        let combinedPhoneStatuses = arpPhoneStatuses.map(arpStatus => {
+          let nmapStatus = nmapPhoneStatuses.find(nmapStatus => nmapStatus.mac === arpStatus.mac);
+          return { mac: arpStatus.mac, isOnline: arpStatus.isOnline || (nmapStatus ? nmapStatus.isOnline : false) };
+        });
+
+        console.log("MMM-PhoneDetect: Sending phone presence status to module");
+        this.sendSocketNotification("PHONE_PRESENCE", combinedPhoneStatuses);
+      });
+    })
+    .catch(error => {
+      console.error("MMM-PhoneDetect: Error in performing ARP scan: ", error);
+    });
+},
 
   // Remaining turn on/off functions...
   turnMirrorOn: function () {
