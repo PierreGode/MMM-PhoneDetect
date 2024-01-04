@@ -1,6 +1,6 @@
 # MMM-PhoneDetect
 
-<H2>Automatically controls the screen's power based on the presence of specified phones within the network.</H2>
+<H2>Automatically controls the screen's power based on the presence of specified phones or devices within the network.</H2>
 
 ![image](https://github.com/PierreGode/MMM-PhoneDetect/assets/8579922/b68340ae-3dad-49ec-abe0-71635c4c403c)
 <p>
