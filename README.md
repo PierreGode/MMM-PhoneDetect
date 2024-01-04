@@ -30,7 +30,7 @@ In MagicMirror/config/config.js
 ```
 
 Default is turn off mirror after 30 minutes if no device is detected, which can be adjusted in config.js<p>
-phones go to sleep mode when not used and stop responding to ARP so recommended is to have 30 minutes for one device of inactivity ( nonResponsiveDuration ) before turning off the mirror.
+Phones go to sleep mode when not used and stop responding to ARP so recommended is to have 30 minutes for one device of inactivity ( nonResponsiveDuration ) configured before the module turns off the mirror.
 also best if you add multiple devices ( people ) for better stability/redundancy. 1 device 30 min, 2 devices, 15 min, 3 devices, 7 min and so on.
 
 the module is designed for raspberry pi and requires apt programs
