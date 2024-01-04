@@ -4,7 +4,7 @@ const { exec } = require("child_process");
 module.exports = NodeHelper.create({
   start: function () {
     console.log("MMM-PhoneDetect helper started...");
-    this.lastDetectedTime = Date.now(); // Initialize with current time
+    this.lastOnlineTime = 0; // Initialize last online time
   },
 
   socketNotificationReceived: function (notification, payload) {
@@ -37,66 +37,70 @@ module.exports = NodeHelper.create({
     });
   },
 
-performNmapScan: function () {
-  console.log("MMM-PhoneDetect: Executing nmap scan...");
-  return new Promise((resolve, reject) => {
-    const networkRange = '192.168.1.0/24';
-    exec(`sudo nmap -sn ${networkRange}`, (error, stdout) => {
-      if (error) {
-        console.error(`MMM-PhoneDetect: Error performing nmap scan: ${error.message}`);
-        reject(error);
-      } else {
-        console.log("MMM-PhoneDetect: nmap scan completed.");
-        console.log("MMM-PhoneDetect: Raw nmap scan output:", stdout); // Additional logging here
-        resolve(stdout);
-      }
-    });
-  });
-},
-
-checkPhonePresence: function () {
-  console.log("MMM-PhoneDetect: Checking phone presence...");
-
-  this.performArpScan()
-    .then(arpScanOutput => {
-      let arpPhoneStatuses = this.config.phones.map(mac => {
-        return { mac: mac, isOnline: arpScanOutput.toLowerCase().includes(mac.toLowerCase()) };
-      });
-
-      this.performNmapScan().then(nmapScanOutput => {
-        console.log("MMM-PhoneDetect: Raw nmap output: \n" + nmapScanOutput);
-
-        let nmapLines = nmapScanOutput.split('\n').filter(line => line.includes('MAC Address:'));
-        let nmapPhoneStatuses = this.config.phones.map(mac => {
-          const isOnline = nmapLines.some(line => line.toLowerCase().includes(mac.toLowerCase()));
-          return { mac: mac, isOnline: isOnline };
-        });
-
-        let combinedPhoneStatuses = arpPhoneStatuses.map(arpStatus => {
-          let nmapStatus = nmapPhoneStatuses.find(nmapStatus => nmapStatus.mac === arpStatus.mac);
-          return { mac: arpStatus.mac, isOnline: arpStatus.isOnline || (nmapStatus ? nmapStatus.isOnline : false) };
-        });
-
-        // Check if any device is online
-        const anyDeviceOnline = combinedPhoneStatuses.some(status => status.isOnline);
-        if (!anyDeviceOnline) {
-          console.log("MMM-PhoneDetect: No devices online.");
+  performNmapScan: function () {
+    console.log("MMM-PhoneDetect: Executing nmap scan...");
+    return new Promise((resolve, reject) => {
+      const networkRange = '192.168.1.0/24';
+      exec(`sudo nmap -sn ${networkRange}`, (error, stdout) => {
+        if (error) {
+          console.error(`MMM-PhoneDetect: Error performing nmap scan: ${error.message}`);
+          reject(error);
         } else {
-          console.log("MMM-PhoneDetect: Some devices are online.");
+          console.log("MMM-PhoneDetect: nmap scan completed.");
+          console.log("MMM-PhoneDetect: Raw nmap scan output:", stdout);
+          resolve(stdout);
         }
-
-        console.log("MMM-PhoneDetect: Sending phone presence status to module");
-        this.sendSocketNotification("PHONE_PRESENCE", combinedPhoneStatuses);
       });
-    })
-    .catch(error => {
-      console.error("MMM-PhoneDetect: Error in performing ARP scan: ", error);
     });
-},
+  },
 
+  checkPhonePresence: function () {
+    console.log("MMM-PhoneDetect: Checking phone presence...");
 
+    this.performArpScan()
+      .then(arpScanOutput => {
+        let arpPhoneStatuses = this.config.phones.map(mac => {
+          return { mac: mac, isOnline: arpScanOutput.toLowerCase().includes(mac.toLowerCase()) };
+        });
 
-  // Remaining turn on/off functions...
+        this.performNmapScan().then(nmapScanOutput => {
+          console.log("MMM-PhoneDetect: Raw nmap output: \n" + nmapScanOutput);
+
+          let nmapLines = nmapScanOutput.split('\n').filter(line => line.includes('MAC Address:'));
+          let nmapPhoneStatuses = this.config.phones.map(mac => {
+            const isOnline = nmapLines.some(line => line.toLowerCase().includes(mac.toLowerCase()));
+            return { mac: mac, isOnline: isOnline };
+          });
+
+          let combinedPhoneStatuses = arpPhoneStatuses.map(arpStatus => {
+            let nmapStatus = nmapPhoneStatuses.find(nmapStatus => nmapStatus.mac === arpStatus.mac);
+            return { mac: arpStatus.mac, isOnline: arpStatus.isOnline || (nmapStatus ? nmapStatus.isOnline : false) };
+          });
+
+          const anyDeviceOnline = combinedPhoneStatuses.some(status => status.isOnline);
+          if (!anyDeviceOnline) {
+            console.log("MMM-PhoneDetect: No devices online.");
+            this.handleNoDevicesOnline();
+          } else {
+            console.log("MMM-PhoneDetect: Some devices are online.");
+            this.lastOnlineTime = Date.now();
+          }
+
+          console.log("MMM-PhoneDetect: Sending phone presence status to module");
+          this.sendSocketNotification("PHONE_PRESENCE", combinedPhoneStatuses);
+        });
+      })
+      .catch(error => {
+        console.error("MMM-PhoneDetect: Error in performing ARP scan: ", error);
+      });
+  },
+
+  handleNoDevicesOnline: function () {
+    if (Date.now() - this.lastOnlineTime >= this.config.nonResponsiveDuration) {
+      this.turnMirrorOff();
+    }
+  },
+
   turnMirrorOn: function () {
     console.log("MMM-PhoneDetect: Turning on the mirror...");
     exec(this.config.turnOnCommand, (error, stdout, stderr) => {
