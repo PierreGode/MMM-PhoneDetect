@@ -42,6 +42,26 @@ the module is designed for raspberry pi and requires apt programs
 sudo apt-get install arp-scan -y
 sudo apt-get install nmap -y
 ```
+
+
+"Dual-Scan Technology" in the context of the MMM-PhoneDetect module for MagicMirror refers to the combined use of ARP (Address Resolution Protocol) and nmap (Network Mapper) scans to detect the presence of specific devices (like mobile phones) on a network. Here's a breakdown of how each technology contributes to the dual-scan approach:
+<p>
+ARP Scan:
+<p>
+Purpose: ARP is used for mapping IP network addresses to the hardware addresses (MAC addresses) used by a data link protocol.
+Operation: The ARP scan sends requests to each IP address in the subnet and listens for responses. Each responding device provides its MAC address.
+Use in MMM-PhoneDetect: ARP scanning is a fast and efficient way to discover devices that are directly reachable in the local network. In the context of MMM-PhoneDetect, it's used to quickly check if the phones (identified by their MAC addresses) are currently active on the local network.
+nmap Scan:
+<p>
+Purpose: nmap is a network scanning tool used for network discovery and security auditing.
+Operation: nmap can be used to discover devices on a network and determine various characteristics about them, such as open ports, operating systems, device types, and more.
+Use in MMM-PhoneDetect: In this module, nmap is used in a more passive mode (-sn flag) to perform a network sweep without port scanning. It helps in identifying devices that might not respond to ARP but are still present on the network.
+How Dual-Scan Works Together:<p>
+Complementary Methods: While ARP scan is quick and works well within the local subnet, nmap provides a more comprehensive network sweep.
+Enhanced Reliability: By combining both methods, MMM-PhoneDetect increases the reliability of detecting whether the specified phones are present on the network. If a device doesn't respond to an ARP request (possibly due to being in a power-saving mode or other reasons), the nmap scan might still detect its presence.<p>
+Decision Making for Screen Control: The module uses the results from both scans to decide whether to turn the MagicMirror screen on or off. If any of the specified devices are detected by either ARP or nmap scan, the screen is turned on; if all devices are absent according to both scans, and the specified time conditions are met, the screen is turned off.
+<p>
+
 test that the commands for turning on and off the mirror works in terminal
 
 ```
