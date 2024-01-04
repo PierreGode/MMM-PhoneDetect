@@ -46,7 +46,8 @@ performNmapScan: function () {
         console.error(`MMM-PhoneDetect: Error performing nmap scan: ${error.message}`);
         reject(error);
       } else {
-        console.log("MMM-PhoneDetect: nmap scan completed. Raw output:", stdout);
+        console.log("MMM-PhoneDetect: nmap scan completed.");
+        console.log("MMM-PhoneDetect: Raw nmap scan output:", stdout); // Additional logging here
         resolve(stdout);
       }
     });
