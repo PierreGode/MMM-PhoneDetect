@@ -78,12 +78,13 @@ module.exports = NodeHelper.create({
           });
 
           const anyDeviceOnline = combinedPhoneStatuses.some(status => status.isOnline);
-          if (!anyDeviceOnline) {
+          if (anyDeviceOnline) {
+            console.log("MMM-PhoneDetect: Some devices are online. Turning on the mirror.");
+            this.turnMirrorOn();
+            this.lastOnlineTime = Date.now();
+          } else {
             console.log("MMM-PhoneDetect: No devices online.");
             this.checkAndTurnOffMirror();
-          } else {
-            console.log("MMM-PhoneDetect: Some devices are online.");
-            this.lastOnlineTime = Date.now();
           }
 
           console.log("MMM-PhoneDetect: Sending phone presence status to module");
@@ -97,6 +98,7 @@ module.exports = NodeHelper.create({
 
   checkAndTurnOffMirror: function () {
     if (Date.now() - this.lastOnlineTime >= this.config.nonResponsiveDuration) {
+      console.log("MMM-PhoneDetect: Turning off the mirror due to no phone presence for the specified duration.");
       this.turnMirrorOff();
     }
   },
