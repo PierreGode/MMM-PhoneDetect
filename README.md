@@ -21,6 +21,8 @@ In MagicMirror/config/config.js
     phones: ["XX:XX:XX:XX:XX:XX", "YY:YY:YY:YY:YY:YY"], // List of phone MAC addresses to detect
     turnOnCommand: "vcgencmd display_power 1 2", // Command to turn on the mirror
     turnOffCommand: "vcgencmd display_power 0 2", // Command to turn off the mirror
+    startignoreHour: 23, // Begin ignore period at 23:00, this will prevent the Command to turn off/on the mirror specific hours
+    endignoreHour: 6,   // End ignore period at 6:00
     checkInterval: 5000, // Check for phone presence every 5 seconds
     nonResponsiveDuration: 3600000, // Duration in milliseconds (1 hour by default)
   },
