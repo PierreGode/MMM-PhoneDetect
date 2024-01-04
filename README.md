@@ -2,8 +2,8 @@
 ![image](https://github.com/PierreGode/MMM-PhoneDetect/assets/8579922/b68340ae-3dad-49ec-abe0-71635c4c403c)
 <p>
 For raspberry pi <p>
-Detect if phones are in the network and turn on and off the mirror depending on the status.
-Configured devices are represented as dots and will show them as green when the device is responding to ARP or nmap.
+Detect if phones are online in the network and turn on and off the mirror depending on the status.
+Configured devices in config.js are represented as dots and will show them as green when the device is responding to ARP or nmap.
 
 How to install:
 ```
