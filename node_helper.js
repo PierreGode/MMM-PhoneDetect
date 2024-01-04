@@ -1,3 +1,5 @@
+
+// PhoneDetect by Pierre Gode
 const NodeHelper = require("node_helper");
 const { exec } = require("child_process");
 
