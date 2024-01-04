@@ -56,39 +56,38 @@ performNmapScan: function () {
 checkPhonePresence: function () {
   console.log("MMM-PhoneDetect: Checking phone presence...");
 
-  // Performing ARP Scan
   this.performArpScan()
     .then(arpScanOutput => {
       let arpPhoneStatuses = this.config.phones.map(mac => {
         return { mac: mac, isOnline: arpScanOutput.toLowerCase().includes(mac.toLowerCase()) };
       });
 
-      // Performing nmap Scan
       this.performNmapScan().then(nmapScanOutput => {
         console.log("MMM-PhoneDetect: Raw nmap output: \n" + nmapScanOutput);
-        
+
+        // Split the nmap output into lines and filter out irrelevant ones
+        let nmapLines = nmapScanOutput.split('\n').filter(line => line.includes('MAC Address:'));
         let nmapPhoneStatuses = this.config.phones.map(mac => {
-          const isOnline = nmapScanOutput.toLowerCase().includes(mac.toLowerCase());
+          // Check if any line contains the MAC address
+          const isOnline = nmapLines.some(line => line.toLowerCase().includes(mac.toLowerCase()));
           return { mac: mac, isOnline: isOnline };
         });
 
-        // Combining results from ARP and nmap scans
+        // Combine results from ARP and nmap scans
         let combinedPhoneStatuses = arpPhoneStatuses.map(arpStatus => {
           let nmapStatus = nmapPhoneStatuses.find(nmapStatus => nmapStatus.mac === arpStatus.mac);
           return { mac: arpStatus.mac, isOnline: arpStatus.isOnline || (nmapStatus ? nmapStatus.isOnline : false) };
         });
 
-        // Sending the combined statuses to the main module
         console.log("MMM-PhoneDetect: Sending phone presence status to module");
         this.sendSocketNotification("PHONE_PRESENCE", combinedPhoneStatuses);
-      }).catch(nmapError => {
-        console.error("MMM-PhoneDetect: Error in performing nmap scan: ", nmapError);
       });
     })
-    .catch(arpError => {
-      console.error("MMM-PhoneDetect: Error in performing ARP scan: ", arpError);
+    .catch(error => {
+      console.error("MMM-PhoneDetect: Error in performing ARP scan: ", error);
     });
 },
+
 
 
   // Remaining turn on/off functions...
