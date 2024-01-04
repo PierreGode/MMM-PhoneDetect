@@ -65,19 +65,24 @@ checkPhonePresence: function () {
       this.performNmapScan().then(nmapScanOutput => {
         console.log("MMM-PhoneDetect: Raw nmap output: \n" + nmapScanOutput);
 
-        // Split the nmap output into lines and filter out irrelevant ones
         let nmapLines = nmapScanOutput.split('\n').filter(line => line.includes('MAC Address:'));
         let nmapPhoneStatuses = this.config.phones.map(mac => {
-          // Check if any line contains the MAC address
           const isOnline = nmapLines.some(line => line.toLowerCase().includes(mac.toLowerCase()));
           return { mac: mac, isOnline: isOnline };
         });
 
-        // Combine results from ARP and nmap scans
         let combinedPhoneStatuses = arpPhoneStatuses.map(arpStatus => {
           let nmapStatus = nmapPhoneStatuses.find(nmapStatus => nmapStatus.mac === arpStatus.mac);
           return { mac: arpStatus.mac, isOnline: arpStatus.isOnline || (nmapStatus ? nmapStatus.isOnline : false) };
         });
+
+        // Check if any device is online
+        const anyDeviceOnline = combinedPhoneStatuses.some(status => status.isOnline);
+        if (!anyDeviceOnline) {
+          console.log("MMM-PhoneDetect: No devices online.");
+        } else {
+          console.log("MMM-PhoneDetect: Some devices are online.");
+        }
 
         console.log("MMM-PhoneDetect: Sending phone presence status to module");
         this.sendSocketNotification("PHONE_PRESENCE", combinedPhoneStatuses);
