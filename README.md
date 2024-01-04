@@ -62,3 +62,5 @@ dtoverlay=vc4-fkms-v3d
 
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/J3J2EARPK)
+
+development status = WIP
