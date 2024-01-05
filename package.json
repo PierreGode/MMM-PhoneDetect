@@ -1,0 +1,17 @@
+{
+    "name": "mmm-phonedetect",
+    "version": "1.0.0",
+    "description": "A module for the MagicMirror² to detect if phones are in network and turn on and off the mirror .",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/PierreGode/MMM-PhoneDetect.git"
+    },
+    "keywords": [
+        "magicmirror",
+        "phone",
+        "presence",
+       "detection"
+    ],
+    "author": "PierreGode",
+    "license": "MIT"
+}
