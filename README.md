@@ -80,6 +80,8 @@ dtoverlay=vc4-fkms-v3d
 ```
  and reboot
 
+/Created by Pierre Gode
+
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/J3J2EARPK)
 
