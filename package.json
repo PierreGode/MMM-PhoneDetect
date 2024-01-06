@@ -10,7 +10,7 @@
         "magicmirror",
         "phone",
         "presence",
-       "detection"
+        "detection"
     ],
     "author": "PierreGode",
     "license": "MIT"
