@@ -1,29 +1,29 @@
 // PhoneDetect by Pierre Gode
-const NodeHelper = require("node_helper");
 const { exec } = require("child_process");
+const NodeHelper = require("node_helper");
 
 module.exports = NodeHelper.create({
-  start: function () {
+  start () {
     console.log("MMM-PhoneDetect helper started...");
     this.lastOnlineTime = Date.now(); // Initialize with current time
   },
 
-  socketNotificationReceived: function (notification, payload) {
+  socketNotificationReceived (notification, payload) {
     if (notification === "CONFIG") {
       this.config = payload;
       this.scheduleCheck();
     }
   },
 
-  scheduleCheck: function () {
+  scheduleCheck () {
     setInterval(() => {
       this.checkPhonePresence();
     }, this.config.checkInterval);
   },
 
-  performArpScan: function () {
+  performArpScan () {
     return new Promise((resolve, reject) => {
-      exec('sudo arp-scan -q -l', (error, stdout) => {
+      exec("sudo arp-scan -q -l", (error, stdout) => {
         if (error) {
           console.error(`MMM-PhoneDetect: Error performing ARP scan: ${error.message}`);
           reject(error);
@@ -34,9 +34,9 @@ module.exports = NodeHelper.create({
     });
   },
 
-  performNmapScan: function () {
+  performNmapScan () {
     return new Promise((resolve, reject) => {
-      const networkRange = '192.168.1.0/24';
+      const networkRange = "192.168.1.0/24";
       exec(`sudo nmap -sn ${networkRange}`, (error, stdout) => {
         if (error) {
           console.error(`MMM-PhoneDetect: Error performing nmap scan: ${error.message}`);
@@ -48,27 +48,24 @@ module.exports = NodeHelper.create({
     });
   },
 
-  checkPhonePresence: function () {
+  checkPhonePresence () {
     this.performArpScan()
-      .then(arpScanOutput => {
-        let arpPhoneStatuses = this.config.phones.map(mac => {
-          return { mac: mac, isOnline: arpScanOutput.toLowerCase().includes(mac.toLowerCase()) };
-        });
+      .then((arpScanOutput) => {
+        const arpPhoneStatuses = this.config.phones.map((mac) => ({ mac, isOnline: arpScanOutput.toLowerCase().includes(mac.toLowerCase()) }));
 
-        this.performNmapScan().then(nmapScanOutput => {
-
-          let nmapLines = nmapScanOutput.split('\n').filter(line => line.includes('MAC Address:'));
-          let nmapPhoneStatuses = this.config.phones.map(mac => {
-            const isOnline = nmapLines.some(line => line.toLowerCase().includes(mac.toLowerCase()));
-            return { mac: mac, isOnline: isOnline };
+        this.performNmapScan().then((nmapScanOutput) => {
+          const nmapLines = nmapScanOutput.split("\n").filter((line) => line.includes("MAC Address:"));
+          const nmapPhoneStatuses = this.config.phones.map((mac) => {
+            const isOnline = nmapLines.some((line) => line.toLowerCase().includes(mac.toLowerCase()));
+            return { mac, isOnline };
           });
 
-          let combinedPhoneStatuses = arpPhoneStatuses.map(arpStatus => {
-            let nmapStatus = nmapPhoneStatuses.find(nmapStatus => nmapStatus.mac === arpStatus.mac);
+          const combinedPhoneStatuses = arpPhoneStatuses.map((arpStatus) => {
+            const nmapStatus = nmapPhoneStatuses.find((nmapStatus) => nmapStatus.mac === arpStatus.mac);
             return { mac: arpStatus.mac, isOnline: arpStatus.isOnline || (nmapStatus ? nmapStatus.isOnline : false) };
           });
 
-          const anyDeviceOnline = combinedPhoneStatuses.some(status => status.isOnline);
+          const anyDeviceOnline = combinedPhoneStatuses.some((status) => status.isOnline);
           if (anyDeviceOnline) {
             this.turnMirrorOn();
             this.lastOnlineTime = Date.now();
@@ -78,17 +75,17 @@ module.exports = NodeHelper.create({
           this.sendSocketNotification("PHONE_PRESENCE", combinedPhoneStatuses);
         });
       })
-      .catch(error => {
+      .catch((error) => {
       });
   },
 
-  checkAndTurnOffMirror: function () {
+  checkAndTurnOffMirror () {
     if (Date.now() - this.lastOnlineTime >= this.config.nonResponsiveDuration && !this.isWithinIgnoreHours()) {
       this.turnMirrorOff();
     }
   },
 
-  turnMirrorOn: function () {
+  turnMirrorOn () {
     if (!this.isWithinIgnoreHours()) {
       console.log("MMM-PhoneDetect: Turning on the mirror...");
       exec(this.config.turnOnCommand, (error, stdout, stderr) => {
@@ -103,7 +100,7 @@ module.exports = NodeHelper.create({
     }
   },
 
-  turnMirrorOff: function () {
+  turnMirrorOff () {
     if (!this.isWithinIgnoreHours()) {
       console.log("MMM-PhoneDetect: Turning off the mirror...");
       exec(this.config.turnOffCommand, (error, stdout, stderr) => {
@@ -118,7 +115,7 @@ module.exports = NodeHelper.create({
     }
   },
 
-  isWithinIgnoreHours: function() {
+  isWithinIgnoreHours () {
     const currentHour = new Date().getHours();
     const { startignoreHour, endignoreHour } = this.config;
 
@@ -127,5 +124,5 @@ module.exports = NodeHelper.create({
     } else {
       return currentHour >= startignoreHour || currentHour < endignoreHour;
     }
-  },
+  }
 });

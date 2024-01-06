@@ -1,33 +1,33 @@
-Module.register('MMM-PhoneDetect', {
+Module.register("MMM-PhoneDetect", {
   defaults: {
     phones: [], // List of phone MAC addresses to detect
-    checkInterval: 5000, // Check for phone presence every 5 seconds
+    checkInterval: 5000 // Check for phone presence every 5 seconds
   },
 
-  start: function () {
+  start () {
     console.log("Starting MMM-PhoneDetect module");
     this.sendSocketNotification("CONFIG", this.config);
     this.onlineDevices = new Set(); // Initialize a set to track online devices
   },
 
-  getDom: function() {
-    var wrapper = document.createElement("div");
+  getDom () {
+    const wrapper = document.createElement("div");
     wrapper.className = "phone-dots-container";
 
-    this.config.phones.forEach(phone => {
-      var dot = document.createElement("span");
-      dot.className = "phone-dot " + (this.onlineDevices.has(phone) ? "online" : "offline");
-      dot.id = "dot-" + phone; // Assign an ID for easier DOM manipulation
+    this.config.phones.forEach((phone) => {
+      const dot = document.createElement("span");
+      dot.className = `phone-dot ${this.onlineDevices.has(phone) ? "online" : "offline"}`;
+      dot.id = `dot-${phone}`; // Assign an ID for easier DOM manipulation
       wrapper.appendChild(dot);
     });
 
     return wrapper;
   },
 
-  socketNotificationReceived: function(notification, payload) {
+  socketNotificationReceived (notification, payload) {
     if (notification === "PHONE_PRESENCE") {
-      payload.forEach(phone => {
-        let dot = document.getElementById("dot-" + phone.mac);
+      payload.forEach((phone) => {
+        const dot = document.getElementById(`dot-${phone.mac}`);
         if (dot) {
           if (phone.isOnline) {
             this.onlineDevices.add(phone.mac);
@@ -41,7 +41,7 @@ Module.register('MMM-PhoneDetect', {
     }
   },
 
-  getStyles: function() {
+  getStyles () {
     return ["MMM-PhoneDetect.css"];
-  },
+  }
 });
