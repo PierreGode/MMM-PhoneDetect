@@ -13,6 +13,10 @@ For raspberry pi
 Detect if phones are online in the network and turn on and off the mirror depending on the status.
 Configured devices in config.js are represented as dots and will show them as green when the device is responding to ARP or nmap.
 
+> [!WARNING]
+> **update april 2024:** vcgencmd stopped working with latest rasbian Operating System: Debian GNU/Linux 12 (bookworm)
+
+
 ## How to install
 
 ```bash
